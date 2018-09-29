@@ -160,7 +160,7 @@ class App extends Component {
               </div>
               <div className="col-4">Date</div>
             </div>
-            {data == undefined && <div>No Items To Display, Please make sure you are running the server</div>}
+            {data === undefined && <div>No Items To Display, Please make sure you are running the server</div>}
           </section>
           <div ref="iScroll" style={{height: '450px', overflow: 'auto'}}>
             <ul>{this.displayItems(data)}</ul>
