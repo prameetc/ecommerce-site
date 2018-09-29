@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-import logo from './logo.svg';
 import './App.css';
 
 class App extends Component {
@@ -61,20 +60,6 @@ class App extends Component {
       });
   };
 
-  getAds = () => {
-    return axios
-      .get(
-        'http://localhost:3000/ads/?r=' + Math.floor(Math.random() * 1000) + ''
-      ) // Dummy URL
-      .then(response => {
-        this.response = response.data;
-        return this.response;
-      })
-      .catch(function(error) {
-        console.log('error', error);
-      });
-  };
-
   displayItems(data) {
     var items = [];
     var time = [];
@@ -91,6 +76,13 @@ class App extends Component {
         );
       time = Math.floor(delta / day);
       items.push(
+      <div>
+          {i > 0 && i % 20 === 0 &&
+            (
+              <div className="pt-3 pb-3">
+              Advertisement - <img src={`http://localhost:3000/ads/?r=${Math.floor(Math.random() * 1000)}`} /></div>
+            )
+          }
         <div key={i} className="row">
           <div className="col-3 pb-3">{data[i] && data[i].id}</div>
           <div className="col-2 pb-3">{data[i] && data[i].face}</div>
@@ -98,8 +90,11 @@ class App extends Component {
             {data[i] && `$${insertDecimal(data[i].price)}`}
           </div>
           <div className="col-1 pb-3">{data[i] && data[i].size}</div>
-          <div className="col-4 pb-3">{(data[i] && time < 7) ? (`${time} days ago`) : (data[i] && data[i].date)}</div>
+          <div className="col-4 pb-3">
+            {data[i] && time < 7 ? `${time} days ago` : data[i] && data[i].date}
+          </div>
         </div>
+      </div>
       );
     }
     return items;
@@ -136,14 +131,7 @@ class App extends Component {
               available to purchase. Be sure to peruse our selection of ascii
               faces in an exciting range of sizes and prices.
             </p>
-            <script>
-              document.write('<img
-                className="ad"
-                src="/ads/?r=' + Math.floor(Math.random()*1000) + '"
-              />');
-            </script>
           </header>
-
           <section>
             <div className="row mt-2 mb-5">
               <div className="col-3">
