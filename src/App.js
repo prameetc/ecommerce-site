@@ -20,7 +20,7 @@ class App extends Component {
         return this.response;
       })
       .catch(function(error) {
-        console.log(error);
+        alert(error);
       });
   };
 
@@ -32,7 +32,7 @@ class App extends Component {
         this.setState({data: this.response});
       })
       .catch(function(error) {
-        console.log(error);
+        alert(error);
       });
   };
 
@@ -44,7 +44,7 @@ class App extends Component {
         this.setState({data: this.response});
       })
       .catch(function(error) {
-        console.log(error);
+        alert(error);
       });
   };
 
@@ -56,11 +56,12 @@ class App extends Component {
         this.setState({data: this.response});
       })
       .catch(function(error) {
-        console.log(error);
+        alert(error);
       });
   };
 
   displayItems(data) {
+    
     var items = [];
     var time = [];
     var millisecond = 1;
@@ -70,7 +71,7 @@ class App extends Component {
       return (num / 100).toFixed(2);
     }
     for (var i = 0; i < this.state.items; i++) {
-      if (data[i])
+      if (data && data[i])
         var delta = Math.round(
           new Date() - (data[i] && new Date(data[i].date))
         );
@@ -80,20 +81,21 @@ class App extends Component {
           {i > 0 && i % 20 === 0 &&
             (
               <div className="pt-3 pb-3">
-              Advertisement - <img src={`http://localhost:3000/ads/?r=${Math.floor(Math.random() * 1000)}`} /></div>
+              Advertisement - <img alt="Ad" src={`http://localhost:3000/ads/?r=${Math.floor(Math.random() * 1000)}`} /></div>
             )
           }
-        <div key={i} className="row">
-          <div className="col-3 pb-3">{data[i] && data[i].id}</div>
-          <div className="col-2 pb-3">{data[i] && data[i].face}</div>
-          <div className="col-2 pb-3">
-            {data[i] && `$${insertDecimal(data[i].price)}`}
+          {data && <div key={i} className="row">
+            <div className="col-3 pb-3">{data[i] && data[i].id}</div>
+            <div className="col-2 pb-3">{data[i] && data[i].face}</div>
+            <div className="col-2 pb-3">
+              {data[i] && `$${insertDecimal(data[i].price)}`}
+            </div>
+            <div className="col-1 pb-3">{data[i] && data[i].size}</div>
+            <div className="col-4 pb-3">
+              {data[i] && time < 7 ? `${time} days ago` : data[i] && data[i].date}
+            </div>
           </div>
-          <div className="col-1 pb-3">{data[i] && data[i].size}</div>
-          <div className="col-4 pb-3">
-            {data[i] && time < 7 ? `${time} days ago` : data[i] && data[i].date}
-          </div>
-        </div>
+          }
       </div>
       );
     }
@@ -120,7 +122,7 @@ class App extends Component {
   }
 
   render() {
-    const {data} = this.state;
+    const { data } = this.state;
     return (
       <div className="App">
         <div className="container p-0">
@@ -158,6 +160,7 @@ class App extends Component {
               </div>
               <div className="col-4">Date</div>
             </div>
+            {data == undefined && <div>No Items To Display, Please make sure you are running the server</div>}
           </section>
           <div ref="iScroll" style={{height: '450px', overflow: 'auto'}}>
             <ul>{this.displayItems(data)}</ul>
