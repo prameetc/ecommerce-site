@@ -8,13 +8,14 @@ class App extends Component {
     super();
     this.state = {
       data: [],
-      ads: []
+      ads: [],
+      items: 20,
+      loadingState: false
     };
   }
   getFormValues = () => {
-    // Sample API GET request using axios. Can be replaced with actual GET call.
     return axios
-      .get('http://localhost:3000/products?_limit=20') // Dummy URL
+      .get('http://localhost:3000/products')
       .then(response => {
         this.response = response.data;
         return this.response;
@@ -23,6 +24,43 @@ class App extends Component {
         console.log(error);
       });
   };
+
+  sortByPrice = () => {
+    return axios
+      .get('http://localhost:3000/products?_sort=price')
+      .then(response => {
+        this.response = response.data;
+        this.setState({data: this.response});
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
+  sortByID = () => {
+    return axios
+      .get('http://localhost:3000/products?_sort=id')
+      .then(response => {
+        this.response = response.data;
+        this.setState({data: this.response});
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
+  sortBySize = () => {
+    return axios
+      .get('http://localhost:3000/products?_sort=size')
+      .then(response => {
+        this.response = response.data;
+        this.setState({data: this.response});
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
   getAds = () => {
     return axios
       .get(
@@ -31,26 +69,66 @@ class App extends Component {
       .then(response => {
         this.response = response.data;
         return this.response;
-        console.log(response);
       })
       .catch(function(error) {
-        console.log('hola', error);
+        console.log('error', error);
       });
   };
 
+  displayItems(data) {
+    var items = [];
+    var time = [];
+    var millisecond = 1;
+    var day = millisecond * 1000 * 60 * 60 * 24;
+
+    function insertDecimal(num) {
+      return (num / 100).toFixed(2);
+    }
+    for (var i = 0; i < this.state.items; i++) {
+      if (data[i])
+        var delta = Math.round(
+          new Date() - (data[i] && new Date(data[i].date))
+        );
+      time = Math.floor(delta / day);
+      items.push(
+        <div key={i} className="row">
+          <div className="col-3 pb-3">{data[i] && data[i].id}</div>
+          <div className="col-2 pb-3">{data[i] && data[i].face}</div>
+          <div className="col-2 pb-3">
+            {data[i] && `$${insertDecimal(data[i].price)}`}
+          </div>
+          <div className="col-1 pb-3">{data[i] && data[i].size}</div>
+          <div className="col-4 pb-3">{(data[i] && time < 7) ? (`${time} days ago`) : (data[i] && data[i].date)}</div>
+        </div>
+      );
+    }
+    return items;
+  }
+
+  loadMoreItems() {
+    this.setState({loadingState: true});
+    setTimeout(() => {
+      this.setState({items: this.state.items + 10, loadingState: false});
+    }, 2000);
+  }
+
   componentDidMount() {
     this.getFormValues().then(data => this.setState({data}));
-    this.getAds().then(ads => {
-      return <img className="ad" src={ads} />;
+    this.refs.iScroll.addEventListener('scroll', () => {
+      if (
+        this.refs.iScroll.scrollTop + this.refs.iScroll.clientHeight >=
+        this.refs.iScroll.scrollHeight
+      ) {
+        this.loadMoreItems();
+      }
     });
   }
 
   render() {
-    console.log('dataa', this.state.data, this.state.ads);
     const {data} = this.state;
     return (
       <div className="App">
-        <div className="container">
+        <div className="container p-0">
           <header>
             <h1>Products Grid</h1>
             <p>
@@ -58,7 +136,6 @@ class App extends Component {
               available to purchase. Be sure to peruse our selection of ascii
               faces in an exciting range of sizes and prices.
             </p>
-            <p>But first, a word from our sponsors:</p>{' '}
             <script>
               document.write('<img
                 className="ad"
@@ -67,24 +144,42 @@ class App extends Component {
             </script>
           </header>
 
-          <section className="products">
-            <div className="row mt-2 mb-2">
-              <div className="col-4">Font</div>
-              <div className="col-4">Price</div>
-              <div className="col-4">Size</div>
+          <section>
+            <div className="row mt-2 mb-5">
+              <div className="col-3">
+                ID
+                <i
+                  className="fas pl-4 fa-sort"
+                  onClick={() => this.sortByID()}
+                />
+              </div>
+              <div className="col-2">Font</div>
+              <div className="col-2">
+                Price
+                <i
+                  className="fas pl-4 fa-sort"
+                  onClick={() => this.sortByPrice()}
+                />
+              </div>
+              <div className="col-1">
+                Size
+                <i
+                  className="fas pl-4 fa-sort"
+                  onClick={() => this.sortBySize()}
+                />
+              </div>
+              <div className="col-4">Date</div>
             </div>
-            {data &&
-              data.map((index, key) => {
-                console.log(key);
-                return (
-                  <div className="row">
-                    <div className="col-4">{index.face}</div>
-                    <div className="col-4">{index.price}</div>
-                    <div className="col-4">{index.size}</div>
-                  </div>
-                );
-              })}
           </section>
+          <div ref="iScroll" style={{height: '450px', overflow: 'auto'}}>
+            <ul>{this.displayItems(data)}</ul>
+
+            {this.state.loadingState ? (
+              <p className="loading"> Loading More Items..</p>
+            ) : (
+              ''
+            )}
+          </div>
         </div>
       </div>
     );
